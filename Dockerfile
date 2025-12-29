@@ -1,7 +1,7 @@
-FROM ubuntu:22.04
+FROM ghcr.io/mstorsjo/wine:latest
 
 RUN apt-get update && \
-    apt-get install -y wine64 python3 msitools ca-certificates && \
+    apt-get install -y python3 msitools ca-certificates && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
 
