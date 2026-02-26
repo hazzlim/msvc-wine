@@ -53,7 +53,16 @@ ln_s MSVC vc/tools/msvc
 # /DEFAULTLIB:"OLDNAMES", which lld-link doesn't find on a case sensitive
 # filesystem. Therefore add matching case symlinks for this, to allow
 # linking MSVC built objects with lld-link.
-cd $(echo vc/tools/msvc/* | awk '{print $1}')/lib
+MSVC_DIR=$(for v in vc/tools/msvc/*; do
+    if [ -d "$v/include" ]; then
+        basename "$v"
+        break
+    fi
+done)
+if [ -z "$MSVC_DIR" ]; then
+    MSVC_DIR=$(ls -d vc/tools/msvc/* | tail -n1 | xargs basename)
+fi
+cd "vc/tools/msvc/$MSVC_DIR/lib"
 for arch in x86 x64 arm arm64; do
     if [ ! -d "$arch" ]; then
         continue
@@ -71,8 +80,10 @@ cd ..
 # Thus process them to reference the other headers with lowercase names.
 # Also lowercase these files, as a few of them do have non-lowercase names,
 # and the call to fixinclude lowercases those references.
-"$ORIG"/lowercase -symlink include
-"$ORIG"/fixinclude include
+if [ -d "vc/tools/msvc/$MSVC_DIR/include" ]; then
+    "$ORIG"/lowercase -symlink "vc/tools/msvc/$MSVC_DIR/include"
+    "$ORIG"/fixinclude "vc/tools/msvc/$MSVC_DIR/include"
+fi
 if [ -d "atlmfc/include" ]; then
     # The ATL headers are lowercased themselves, but they refer to
     # WinSDK headers with mixed casing.
@@ -170,7 +181,7 @@ if [ "$(uname -m)" = "aarch64" ]; then
     dotnet_host=arm64
 fi
 
-MSVCVER=$(basename $(echo vc/tools/msvc/* | awk '{print $1}'))
+MSVCVER="$MSVC_DIR"
 echo Using MSVC version $MSVCVER
 
 # Support `import std` for CMake.
