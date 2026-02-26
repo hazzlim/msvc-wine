@@ -15,7 +15,7 @@ WORKDIR /opt/msvc
 COPY lowercase fixinclude install.sh vsdownload.py msvctricks.cpp ./
 COPY wrappers/* ./wrappers/
 
-RUN PYTHONUNBUFFERED=1 ./vsdownload.py --preview --major 18 --msvc-version preview --architecture host --accept-license --dest /opt/msvc && \
+RUN PYTHONUNBUFFERED=1 ./vsdownload.py --preview --major 18 --msvc-version preview --accept-license --dest /opt/msvc && \
     ./install.sh /opt/msvc && \
     rm lowercase fixinclude install.sh vsdownload.py && \
     rm -rf wrappers
